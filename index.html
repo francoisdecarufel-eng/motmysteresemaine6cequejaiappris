@@ -3,991 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventure Mathématique d'Halloween - 2e Cycle</title>
+    <title>Le Manoir des Mots Cachés - Halloween (4e Année)</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone pour JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas pour l'exportation PNG HD -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap');
-
-        :root {
-            --halloween-orange: #ff7518;
-            --halloween-dark: #121214;
-            --halloween-purple: #6a1b9a;
-            --halloween-green: #2e7d32;
-            --halloween-blood: #c62828;
-            --card-bg: #1e1e24;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap');
+        
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--halloween-dark);
-            color: #f0f0f0;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(106, 27, 154, 0.25) 0%, transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(255, 117, 24, 0.2) 0%, transparent 50%);
-            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
         }
 
-        h1, h2, .creepster-font {
-            font-family: 'Creepster', cursive;
-            letter-spacing: 2px;
+        .font-fredoka {
+            font-family: 'Fredoka', cursive, sans-serif;
         }
 
-        .game-container {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 3px solid var(--halloween-orange);
-            border-radius: 20px;
-            box-shadow: 0 0 25px rgba(255, 117, 24, 0.4), inset 0 0 15px rgba(0,0,0,0.9);
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Buttons */
-        .btn-creepy {
-            background: linear-gradient(135deg, #e65100, #b71c1c);
-            border: 2px solid #ffffff;
-            color: white;
-            font-family: 'Creepster', cursive;
-            text-shadow: 1px 1px 3px black;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-        }
-        .btn-creepy:hover:not(:disabled) {
-            transform: scale(1.04);
-            background: linear-gradient(135deg, #ff6d00, #d32f2f);
-            box-shadow: 0 0 20px var(--halloween-orange);
-            cursor: pointer;
-        }
-        .btn-creepy:active:not(:disabled) {
-            transform: scale(0.96);
-        }
-
-        /* MCQ Buttons */
-        .option-btn {
-            background-color: #2a2a36;
-            border: 2px solid var(--halloween-purple);
-            border-radius: 12px;
-            color: #f0f0f0;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 60px;
-            padding: 12px 16px;
-        }
-        .option-btn:hover:not(:disabled) {
-            background-color: #4a148c;
-            border-color: var(--halloween-orange);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(106, 27, 154, 0.5);
-        }
-        .option-btn.selected {
-            background-color: var(--halloween-orange);
-            border-color: #ffffff;
-            color: #000000;
-            font-weight: bold;
-        }
-
-        /* Vertical Fraction Display */
-        .fraction-vertical {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            vertical-align: middle;
-            margin: 0 4px;
-            font-weight: bold;
-        }
-        .fraction-numerator {
-            border-bottom: 2px solid currentColor;
-            padding: 0 4px;
-            line-height: 1.1;
-        }
-        .fraction-denominator {
-            padding: 0 4px;
-            line-height: 1.1;
-        }
-
-        /* SVG Containers */
-        .visual-card {
-            background-color: #151518;
-            border: 1px solid #3d3d4e;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
-        }
-
-        /* Progress Bar */
-        .progress-bar-container {
-            background-color: #2a2a35;
-            border-radius: 10px;
-            border: 1px solid #444;
-            height: 18px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--halloween-purple), var(--halloween-orange));
-            width: 0%;
-            transition: width 0.4s ease-out;
-            border-radius: 10px;
-        }
-
-        /* Confetti Canvas */
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        /* Feedback Modal */
-        .feedback-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            border-radius: 18px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .feedback-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .feedback-box {
-            background: #22222a;
-            padding: 2.5rem;
-            border-radius: 16px;
-            text-align: center;
-            border: 3px solid;
-            transform: scale(0.85);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 90%;
-            width: 480px;
-        }
-        .feedback-overlay.active .feedback-box {
-            transform: scale(1);
-        }
-        .feedback-success { border-color: var(--halloween-green); box-shadow: 0 0 25px var(--halloween-green); }
-        .feedback-error { border-color: var(--halloween-blood); box-shadow: 0 0 25px var(--halloween-blood); }
-
-        /* Input specific styling */
-        .num-input {
-            background: #2a2a35;
-            border: 2px solid var(--halloween-orange);
-            color: white;
-            font-size: 1.8rem;
-            text-align: center;
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            width: 180px;
-        }
-        .num-input:focus {
-            outline: none;
-            box-shadow: 0 0 15px var(--halloween-orange);
-        }
-
-        /* Timer */
-        .timer-display {
-            font-family: 'Creepster', cursive;
-            color: #ef5350;
-            text-shadow: 0 0 8px red;
-            animation: pulse-red 1s infinite;
-        }
-        @keyframes pulse-red {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-
-        /* Floating decoration */
-        .ghost-deco {
-            position: absolute;
-            font-size: 3rem;
-            opacity: 0.15;
-            animation: float 4s ease-in-out infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+        /* Personnalisation de la barre de défilement */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; border: 3px solid #e2e8f0; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="p-3 sm:p-6 flex items-center justify-center min-h-screen">
+<body class="min-h-screen bg-slate-100 text-slate-900 pb-32 overflow-y-auto scroll-smooth">
 
-    <canvas id="confetti-canvas"></canvas>
+    <div id="root"></div>
 
-    <!-- Floating Decorations -->
-    <div class="ghost-deco" style="top: 5%; left: 5%;">👻</div>
-    <div class="ghost-deco" style="top: 80%; right: 5%; animation-delay: 1s;">🦇</div>
-    <div class="ghost-deco" style="top: 15%; right: 8%; animation-delay: 2s; font-size: 4rem;">🎃</div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    <div class="game-container w-full p-4 sm:p-8 flex flex-col relative" id="app">
-        
-        <div id="screen-welcome" class="text-center py-8 flex flex-col items-center">
-            <h1 class="text-5xl sm:text-6xl text-orange-500 mb-4 text-shadow-md">Le Manoir des Mathématiques</h1>
-            <p class="text-lg sm:text-xl mb-6 text-gray-300 max-w-xl leading-relaxed">
-                Rejoins l'aventure d'Halloween ! Résous 20 énigmes mathématiques rigoureuses (Base 10, fractions, additions, multiplications). 
-                <br><span class="text-orange-400 font-bold">Règle : En cas d'erreur, tu devras réessayer jusqu'à réussir !</span>
-            </p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8 w-full max-w-md">
-                <div class="bg-gray-800 p-3 rounded-xl text-center border border-purple-800">
-                    <span class="text-3xl block">🎃</span>
-                    <span class="text-xs sm:text-sm text-gray-300">2e Cycle (3e-4e)</span>
-                </div>
-                <div class="bg-gray-800 p-3 rounded-xl text-center border border-purple-800">
-                    <span class="text-3xl block">🦇</span>
-                    <span class="text-xs sm:text-sm text-gray-300">20 Énigmes</span>
-                </div>
-                <div class="bg-gray-800 p-3 rounded-xl text-center border border-purple-800 col-span-2 sm:col-span-1">
-                    <span class="text-3xl block">💡</span>
-                    <span class="text-xs sm:text-sm text-gray-300">Indices inclus</span>
-                </div>
-            </div>
-            <button id="btn-start" class="btn-creepy px-8 py-4 text-2xl rounded-xl">Entrer dans le Manoir !</button>
-        </div>
-
-        <div id="screen-game" class="hidden flex-col h-full">
-            
-            <!-- Header: Progress & Score -->
-            <div class="flex justify-between items-end mb-4 border-b border-gray-700 pb-3">
-                <div class="w-2/3">
-                    <div class="flex justify-between text-xs sm:text-sm mb-1 text-gray-400">
-                        <span id="question-counter" class="font-bold text-orange-400">Énigme : 1/20</span>
-                        <span>Progression</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div id="progress-fill" class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-xs text-gray-400">Score</div>
-                    <div class="text-2xl sm:text-3xl creepster-font text-orange-400" id="score-display">0</div>
-                </div>
-            </div>
-
-            <!-- Hint Button & Timer area -->
-            <div class="flex justify-between items-center mb-2 min-h-[36px]">
-                <div id="skill-tag" class="text-xs font-bold uppercase tracking-wider text-purple-300 bg-purple-950/80 border border-purple-500 rounded-full px-3 py-1">
-            <!-- Hint Button & Category area -->
-            <div class="flex justify-between items-center mb-2 min-h-[36px]">
-                <div id="skill-tag" class="text-xs font-bold uppercase tracking-wider text-purple-300 bg-purple-950/80 border border-purple-500 rounded-full px-3 py-1">
-                    Catégorie
-                </div>
-            </div>
-
-            <!-- Question Area -->
-            <div class="flex-grow flex flex-col items-center justify-center py-2 min-h-[320px]">
-                
-                <!-- The Question Text -->
-                <h2 id="question-text" class="text-xl sm:text-2xl text-center mb-4 font-bold leading-relaxed max-w-2xl">
-                    Chargement de l'énigme...
-                </h2>
-
-                <!-- Visual Area (SVG, Images, Fraction Models) -->
-                <div id="visual-area" class="mb-5 w-full flex justify-center flex-wrap items-center gap-4">
-                    <!-- Dynamic graphics injected here -->
-                </div>
-
-                <!-- Input Area (MCQ Options, Short Input) -->
-                <div id="input-area" class="w-full flex flex-col items-center space-y-4">
-                    <!-- Dynamic inputs injected here -->
-                </div>
-
-            </div>
-
-            <!-- Action Area (Submit Button) -->
-            <div class="mt-auto pt-4 flex justify-center">
-                <button id="btn-submit" class="btn-creepy px-10 py-3 text-xl rounded-xl w-full max-w-xs shadow-lg hidden">Valider ma réponse</button>
-            </div>
-
-            <!-- Feedback Modal Overlay -->
-            <div id="feedback-overlay" class="feedback-overlay">
-                <div id="feedback-box" class="feedback-box">
-                    <div id="feedback-icon" class="text-6xl mb-3"></div>
-                    <h3 id="feedback-title" class="text-3xl creepster-font mb-2"></h3>
-                    <div id="feedback-message" class="text-base sm:text-lg text-gray-200 mb-6 leading-relaxed"></div>
-                    <button id="btn-close-feedback" class="btn-creepy py-2 px-8 rounded-lg text-lg">Continuer</button>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="screen-end" class="hidden flex-col items-center justify-center py-10 text-center">
-            <h1 class="text-5xl creepster-font text-orange-500 mb-4">Victoire dans le Manoir !</h1>
-            
-            <div class="bg-gray-800/90 p-8 rounded-2xl border-2 border-purple-500 mb-8 w-full max-w-md shadow-[0_0_30px_rgba(106,27,154,0.6)]">
-                <div class="text-xl text-gray-300 mb-2">Score Réalisé</div>
-                <div class="text-6xl font-bold text-orange-400 mb-4" id="final-score-display">0/200</div>
-                <div id="final-message" class="text-lg text-purple-200 font-semibold"></div>
-            </div>
-
-            <button id="btn-restart" class="btn-creepy px-8 py-4 text-2xl rounded-xl">Rejouer l'Aventure</button>
-        </div>
-
-    </div>
-
-    <script>
-        /*
-         * Web Audio Synthesizer for Retro Sound FX
-         */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            const now = audioCtx.currentTime;
-
-            if (type === 'correct') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, now);
-                osc.frequency.setValueAtTime(130, now + 0.12);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === 'click') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-                osc.start(now);
-                osc.stop(now + 0.05);
-            } else if (type === 'start') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.setValueAtTime(440, now + 0.15);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            }
-        }
-
-        /*
-         * Confetti Animation Engine
-         */
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        let particles = [];
-
-        function launchConfetti() {
-            const colors = ['#ff7518', '#6a1b9a', '#ffb74d', '#4caf50', '#ffffff'];
-            particles = [];
-            for (let i = 0; i < 100; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    size: Math.random() * 8 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    speedY: Math.random() * 3 + 2,
-                    speedX: Math.random() * 2 - 1,
-                    rotation: Math.random() * 360,
-                    rotationSpeed: Math.random() * 8 - 4
-                });
-            }
-            animateConfetti();
-        }
-
-        function animateConfetti() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate((p.rotation * Math.PI) / 180);
-                ctx.fillStyle = p.color;
-                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                ctx.restore();
-
-                p.y += p.speedY;
-                p.x += p.speedX;
-                p.rotation += p.rotationSpeed;
-            });
-            particles = particles.filter(p => p.y < canvas.height);
-            if (particles.length > 0) requestAnimationFrame(animateConfetti);
-        }
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-
-        // 1. Precise Base-10 Blocks SVG Generator
-        function drawBase10SVG(hundreds, tens, ones) {
-            let svgContent = `<svg class="w-full max-w-xl h-auto" viewBox="0 0 520 ${Math.max(160, Math.ceil(ones/5)*20 + 100)}" xmlns="http://www.w3.org/2000/svg">`;
-            
-            // Render Hundreds (10x10 grids)
-            let xOffset = 10;
-            for (let h = 0; h < hundreds; h++) {
-                svgContent += `<g transform="translate(${xOffset}, 10)">`;
-                svgContent += `<rect width="100" height="100" fill="#e53935" stroke="#b71c1c" stroke-width="2"/>`;
-                for (let i = 1; i < 10; i++) {
-                    svgContent += `<line x1="${i*10}" y1="0" x2="${i*10}" y2="100" stroke="#7f1d1d" stroke-width="1"/>`;
-                    svgContent += `<line x1="0" y1="${i*10}" x2="100" y2="${i*10}" stroke="#7f1d1d" stroke-width="1"/>`;
-                }
-                svgContent += `<text x="50" y="-3" fill="#ffcdd2" font-size="10" font-weight="bold" text-anchor="middle">100</text>`;
-                svgContent += `</g>`;
-                xOffset += 115;
-            }
-
-            // Render Tens (1x10 sticks)
-            for (let t = 0; t < tens; t++) {
-                svgContent += `<g transform="translate(${xOffset}, 10)">`;
-                svgContent += `<rect width="16" height="100" fill="#0288d1" stroke="#01579b" stroke-width="2"/>`;
-                for (let i = 1; i < 10; i++) {
-                    svgContent += `<line x1="0" y1="${i*10}" x2="16" y2="${i*10}" stroke="#01579b" stroke-width="1"/>`;
-                }
-                svgContent += `<text x="8" y="-3" fill="#b3e5fc" font-size="10" font-weight="bold" text-anchor="middle">10</text>`;
-                svgContent += `</g>`;
-                xOffset += 24;
-            }
-
-            // Render Ones (1x1 cubes)
-            xOffset += 15;
-            let startOnesX = xOffset;
-            for (let o = 0; o < ones; o++) {
-                let row = Math.floor(o / 5);
-                let col = o % 5;
-                let ox = startOnesX + col * 18;
-                let oy = 10 + row * 18;
-                svgContent += `<rect x="${ox}" y="${oy}" width="14" height="14" fill="#fbc02d" stroke="#f57f17" stroke-width="1.5" rx="2"/>`;
-            }
-
-            svgContent += `</svg>`;
-            return `<div class="visual-card w-full flex flex-col items-center">${svgContent}<div class="text-xs text-gray-400 mt-2 font-mono">Légende : Rouge = Centaine (100) | Bleu = Dizaine (10) | Jaune = Unité (1)</div></div>`;
-        }
-
-        // 2. High Precision Fraction Pie SVG Generator
-        function drawFractionPieSVG(numerator, denominator, color = '#ff7518') {
-            const size = 160;
-            const center = size / 2;
-            const radius = 70;
-            let slices = '';
-
-            for (let i = 0; i < denominator; i++) {
-                const startAngle = (i * 360 / denominator) * (Math.PI / 180) - Math.PI / 2;
-                const endAngle = ((i + 1) * 360 / denominator) * (Math.PI / 180) - Math.PI / 2;
-
-                const x1 = center + radius * Math.cos(startAngle);
-                const y1 = center + radius * Math.sin(startAngle);
-                const x2 = center + radius * Math.cos(endAngle);
-                const y2 = center + radius * Math.sin(endAngle);
-
-                const largeArc = (360 / denominator) > 180 ? 1 : 0;
-                const pathData = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-                const isFilled = i < numerator;
-                const fillColor = isFilled ? color : '#2a2a35';
-                slices += `<path d="${pathData}" fill="${fillColor}" stroke="#ffffff" stroke-width="2"/>`;
-            }
-
-            return `
-                <div class="visual-card flex flex-col items-center">
-                    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-                        ${slices}
-                    </svg>
-                    <div class="mt-2 text-sm text-gray-300">Forme divisée en <span class="font-bold text-orange-400">${denominator}</span> parts égales</div>
-                </div>
-            `;
-        }
-
-        // 3. Fraction Strip / Bar SVG Generator
-        function drawFractionBarSVG(numerator, denominator, color = '#ab47bc') {
-            const width = 280;
-            const height = 50;
-            const segmentWidth = width / denominator;
-            let rects = '';
-
-            for (let i = 0; i < denominator; i++) {
-                const isFilled = i < numerator;
-                const fill = isFilled ? color : '#2a2a35';
-                rects += `<rect x="${i * segmentWidth}" y="0" width="${segmentWidth}" height="${height}" fill="${fill}" stroke="#ffffff" stroke-width="2"/>`;
-            }
-
-            return `
-                <div class="visual-card flex flex-col items-center">
-                    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                        ${rects}
-                    </svg>
-                    <div class="mt-2 text-sm text-gray-300"><span class="font-bold text-purple-400">${numerator}</span> part(s) colorée(s) sur <span class="font-bold text-purple-400">${denominator}</span></div>
-                </div>
-            `;
-        }
-
-        // Helper for Vertical Fraction HTML Display
-        function renderFractionHTML(num, den) {
-            return `<span class="fraction-vertical"><span class="fraction-numerator">${num}</span><span class="fraction-denominator">${den}</span></span>`;
-        }
-
-        const questionBank = [
-            // --- 1. Base 10 Exchanges & Values ---
-            {
-                id: 1, skill: "Numération - Base 10",
-                question: "Observe le matériel de base 10 ci-dessous (2 plaques de centaine, 4 bâtonnets de dizaine et 15 cubes d'unité). Quel est le nombre total représenté après avoir effectué tous les échanges possibles ?",
-                visual: () => drawBase10SVG(2, 4, 15),
-                options: ["255", "2415", "245", "615"],
-                answer: "255",
-                explanation: "15 unités = 1 dizaine et 5 unités. Ainsi, 4 dizaines + 1 dizaine = 5 dizaines. Avec les 2 centaines, nous obtenons 255 (200 + 50 + 5)."
-            },
-            {
-                id: 2, skill: "Numération - Base 10",
-                question: "Un monstre a accumulé 3 centaines, 12 dizaines et 4 unités de bonbons. Quel nombre cela représente-t-il au total ?",
-                visual: () => `<div class="visual-card text-center text-4xl py-4">🍬 🍬 🍬</div>`,
-                options: ["3124", "424", "324", "412"],
-                answer: "424",
-                explanation: "12 dizaines valent 120 (soit 1 centaine et 2 dizaines). 300 + 120 + 4 = 424."
-            },
-            {
-                id: 3, skill: "Numération - Équivalences",
-                question: "Vrai ou Faux ? Le nombre 250 est exactement égal à 25 dizaines.",
-                options: ["Vrai", "Faux"],
-                answer: "Vrai",
-                explanation: "1 dizaine = 10. Donc 25 dizaines = 25 x 10 = 250."
-            },
-            {
-                id: 4, skill: "Numération - Décomposition",
-                question: "Quelle décomposition représente exactement le nombre 608 ?",
-                options: [
-                    "6 centaines et 8 dizaines",
-                    "60 dizaines et 8 unités",
-                    "60 centaines et 8 unités",
-                    "6 centaines et 80 unités"
-                ],
-                answer: "60 dizaines et 8 unités",
-                explanation: "60 dizaines = 600. Avec 8 unités, on obtient 600 + 8 = 608."
-            },
-
-            // --- 2. Fractions - Parts of Whole & Collection ---
-            {
-                id: 5, skill: "Fractions - Partie d'un tout",
-                question: "Quelle fraction représente la partie orange colorée dans ce disque d'Halloween ?",
-                visual: () => drawFractionPieSVG(3, 8, '#ff7518'),
-                options: [
-                    `Fraction ${renderFractionHTML(3, 8)}`,
-                    `Fraction ${renderFractionHTML(5, 8)}`,
-                    `Fraction ${renderFractionHTML(3, 5)}`,
-                    `Fraction ${renderFractionHTML(8, 3)}`
-                ],
-                answer: `Fraction ${renderFractionHTML(3, 8)}`,
-                explanation: "Le disque est divisé en 8 parts égales (dénominateur = 8) et 3 parts sont colorées (numérateur = 3)."
-            },
-            {
-                id: 6, skill: "Fractions - Partie d'un tout",
-                question: "Observes la bande ci-dessous. Quelle fraction correspond à la partie violette ?",
-                visual: () => drawFractionBarSVG(4, 6, '#ab47bc'),
-                options: [
-                    `Fraction ${renderFractionHTML(4, 6)}`,
-                    `Fraction ${renderFractionHTML(2, 6)}`,
-                    `Fraction ${renderFractionHTML(4, 2)}`,
-                    `Fraction ${renderFractionHTML(6, 4)}`
-                ],
-                answer: `Fraction ${renderFractionHTML(4, 6)}`,
-                explanation: "La bande est partagée en 6 parties égales. 4 parties sont violettes, ce qui donne 4/6."
-            },
-            {
-                id: 7, skill: "Fractions - Collection",
-                question: "Dans une collection de 12 chauves-souris, 4 chauves-souris portent un chapeau de sorcière. Quelle fraction de la collection porte un chapeau ?",
-                visual: () => `
-                    <div class="visual-card text-2xl grid grid-cols-4 gap-2 text-center max-w-xs">
-                        <div>🦇🎩</div><div>🦇🎩</div><div>🦇🎩</div><div>🦇🎩</div>
-                        <div>🦇</div><div>🦇</div><div>🦇</div><div>🦇</div>
-                        <div>🦇</div><div>🦇</div><div>🦇</div><div>🦇</div>
-                    </div>
-                `,
-                options: [
-                    `Fraction ${renderFractionHTML(4, 12)}`,
-                    `Fraction ${renderFractionHTML(8, 12)}`,
-                    `Fraction ${renderFractionHTML(1, 2)}`,
-                    `Fraction ${renderFractionHTML(4, 8)}`
-                ],
-                answer: `Fraction ${renderFractionHTML(4, 12)}`,
-                explanation: "Il y a 4 objets ciblés sur un total de 12 objets dans la collection, soit 4/12."
-            },
-
-            // --- 3. Fractions - Benchmark Comparisons (0, 1/2, 1) ---
-            {
-                id: 8, skill: "Fractions - Repères (0, 1/2, 1)",
-                question: "A quelle valeur repère la fraction représentée ci-dessous est-elle exactement égale ?",
-                visual: () => drawFractionPieSVG(4, 8, '#2e7d32'),
-                options: [
-                    "Égale à 0",
-                    "Égale à 1/2",
-                    "Égale à 1 (un tout)",
-                    "Plus grande que 1"
-                ],
-                answer: "Égale à 1/2",
-                explanation: "4/8 correspond exactement à la moitié de la forme (4 est la moitié de 8)."
-            },
-            {
-                id: 9, skill: "Fractions - Repères (0, 1/2, 1)",
-                question: "Laquelle de ces fractions est la plus proche de 1 (un tout complet) ?",
-                options: [
-                    `Fraction ${renderFractionHTML(1, 10)}`,
-                    `Fraction ${renderFractionHTML(5, 10)}`,
-                    `Fraction ${renderFractionHTML(9, 10)}`,
-                    `Fraction ${renderFractionHTML(2, 10)}`
-                ],
-                answer: `Fraction ${renderFractionHTML(9, 10)}`,
-                explanation: "9/10 signifie qu'il ne manque qu'une seule part sur 10 pour former un tout complet."
-            },
-            {
-                id: 10, skill: "Fractions - Repères (0, 1/2, 1)",
-                question: "Vrai ou Faux ? La fraction 1/8 est plus proche de 0 que de 1/2.",
-                options: ["Vrai", "Faux"],
-                answer: "Vrai",
-                explanation: "Sur une ligne numérique divisée en 8 parts, 1/8 est très près de 0/8, alors que la moitié est à 4/8."
-            },
-
-            // --- 4. Fractions in Everyday Life ---
-            {
-                id: 11, skill: "Fractions - Vie courante",
-                question: "Une tarte à la citrouille est coupée en 4 morceaux égaux. Si tu manges 1 morceau, quelle fraction de la tarte RESTE-t-il ?",
-                visual: () => `<div class="visual-card text-5xl text-center">🥧</div>`,
-                options: [
-                    `Fraction ${renderFractionHTML(1, 4)}`,
-                    `Fraction ${renderFractionHTML(3, 4)}`,
-                    `Fraction ${renderFractionHTML(4, 4)}`,
-                    `Fraction ${renderFractionHTML(2, 4)}`
-                ],
-                answer: `Fraction ${renderFractionHTML(3, 4)}`,
-                explanation: "Il y avait 4/4 au départ. En enlevant 1/4, il reste 3 morceaux sur 4, soit 3/4."
-            },
-            {
-                id: 12, skill: "Calcul Mental - Addition",
-                question: "Calcule mentalement la somme suivante : 15 + 25 = ?",
-                type: "short",
-                answer: "40",
-                validator: (val) => val.trim() === "40",
-                explanation: "15 + 25 = 40 (10 + 20 = 30, et 5 + 5 = 10 ; 30 + 10 = 40)."
-            },
-
-            // --- 5. Addition Facts & Subtraction Facts ---
-            {
-                id: 13, skill: "Opérations - Addition/Soustraction",
-                question: "Calcule le résultat de cette addition d'Halloween : 9 + 8 = ?",
-                type: "short",
-                answer: "17",
-                validator: (val) => val.trim() === "17",
-                explanation: "9 + 8 = 17 (pense à 10 + 8 - 1 = 17)."
-            },
-            {
-                id: 14, skill: "Opérations - Addition/Soustraction",
-                question: "Quel est le nombre manquant dans cette soustraction : 15 - ___ = 7 ?",
-                type: "short",
-                answer: "8",
-                validator: (val) => val.trim() === "8",
-                explanation: "15 - 8 = 7 (car 7 + 8 = 15)."
-            },
-            {
-                id: 15, skill: "Opérations - Égalités",
-                question: "Vrai ou Faux ? L'égalité suivante est exacte : 14 + 6 = 27 - 7",
-                options: ["Vrai", "Faux"],
-                answer: "Vrai",
-                explanation: "14 + 6 = 20 et 27 - 7 = 20. Les deux côtés valent 20, l'égalité est donc VRAIE."
-            },
-
-            // --- 6. Multiplication & Division Facts ---
-            {
-                id: 16, skill: "Opérations - Tables de multiplication",
-                question: "Un groupe de 7 sorcières fabrique chacune 8 balais magiques. Combien de balais ont-elles fabriqués au total ?",
-                visual: () => `<div class="visual-card text-4xl text-center">🧹 🧹 🧹</div>`,
-                type: "short",
-                answer: "56",
-                validator: (val) => val.trim() === "56",
-                explanation: "7 x 8 = 56."
-            },
-            {
-                id: 17, skill: "Opérations - Division",
-                question: "Quel est le résultat de cette division : 63 ÷ 9 = ?",
-                options: ["6", "7", "8", "9"],
-                answer: "7",
-                explanation: "63 ÷ 9 = 7 car 7 x 9 = 63."
-            },
-            {
-                id: 18, skill: "Opérations - Partage équitable",
-                question: "Un fantôme veut répartir équitablement 36 friandises dans 4 sacs. Combien de friandises y aura-t-il par sac ?",
-                type: "short",
-                answer: "9",
-                validator: (val) => val.trim() === "9",
-                explanation: "36 ÷ 4 = 9 (car 9 x 4 = 36)."
-            },
-
-            // --- 7. Mental Math Strategy Questions ---
-            {
-                id: 19, skill: "Calcul Mental - Addition",
-                question: "Calcule mentalement la somme suivante : 45 + 35 = ?",
-                type: "short",
-                answer: "80",
-                validator: (val) => val.trim() === "80",
-                explanation: "45 + 35 = 80 (40 + 30 = 70 et 5 + 5 = 10, ce qui donne 70 + 10 = 80)."
-            },
-            {
-                id: 20, skill: "Calcul Mental - Soustraction",
-                question: "Calcule le résultat de cette soustraction mentale : 100 - 35 = ?",
-                type: "short",
-                answer: "65",
-                validator: (val) => val.trim() === "65",
-                explanation: "100 - 35 = 65 (100 - 30 = 70, puis 70 - 5 = 65)."
-            }
+        // Grille 15x15 avec 20 mots sans intersection, laissant 73 cases vides.
+        const initialGrid = [
+            ['A','G','R','I','C','U','L','T','U','R','E','G','D','M','R'], // R0
+            ['I','M','A','G','I','N','A','T','I','O','N','R','R','A','E'], // R1
+            ['C','I','T','R','O','U','I','L','L','E',null,'O','A','R','G'], // R2
+            ['S','Q','U','E','L','E','T','T','E',null,null,'T','G','I','A'], // R3
+            ['S','O','R','C','I','E','R','E',null,null,null,'T','O','A','R'], // R4
+            ['A','R','A','I','G','N','E','E',null,null,null,'E','N','G','D'], // R5
+            ['E','G','A','L','E','M','E','N','T',null,null,'B','M','E',null], // R6
+            ['M','O','N','S','T','R','E',null,null,null,null,'O','A',null,null], // R7
+            ['F','A','N','T','O','M','E',null,null,null,null,'N','N',null,null], // R8
+            ['V','A','M','P','I','R','E',null,null,null,null,'B','O',null,null], // R9
+            ['F','A','T','I','G','U','E',null,null,null,null,'O','I',null,null], // R10
+            ['C','O','U','R','A','G','E',null,null,null,null,'N','R',null,null], // R11
+            ['M','E','L','A','N','G','E',null,null,null,null,null,null,null,null], // R12
+            ['O','U','V','R','A','G','E',null,null,null,null,null,null,null,null], // R13
+            [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null] // R14
         ];
 
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let selectedOption = null;
-        let questionAttempts = 0;
+        const wordsList = [
+            "AGRICULTURE", "IMAGINATION", "CITROUILLE", "SQUELETTE", "SORCIERE", 
+            "ARAIGNEE", "EGALEMENT", "MONSTRE", "FANTOME", "VAMPIRE", 
+            "FATIGUE", "COURAGE", "MELANGE", "OUVRAGE", "GROTTE", 
+            "DRAGON", "MARIAGE", "REGARD", "BONBON", "MANOIR"
+        ].sort();
 
-        // DOM Element Refs
-        const screenWelcome = document.getElementById('screen-welcome');
-        const screenGame = document.getElementById('screen-game');
-        const screenEnd = document.getElementById('screen-end');
-        
-        const elQuestionText = document.getElementById('question-text');
-        const elVisualArea = document.getElementById('visual-area');
-        const elInputArea = document.getElementById('input-area');
-        const elQuestionCounter = document.getElementById('question-counter');
-        const elScore = document.getElementById('score-display');
-        const elProgressFill = document.getElementById('progress-fill');
-        const elSkillTag = document.getElementById('skill-tag');
-        
-        const btnStart = document.getElementById('btn-start');
-        const btnSubmit = document.getElementById('btn-submit');
-        const btnRestart = document.getElementById('btn-restart');
-        const btnCloseFeedback = document.getElementById('btn-close-feedback');
-        
-        const feedbackOverlay = document.getElementById('feedback-overlay');
-        const feedbackBox = document.getElementById('feedback-box');
-        const feedbackTitle = document.getElementById('feedback-title');
-        const feedbackMessage = document.getElementById('feedback-message');
-        const feedbackIcon = document.getElementById('feedback-icon');
+        const MYSTERY_SENTENCE_LETTERS = "BRAVOPOURTONTRAVAILCESTMAINTENANTLEMOISDELHALLOWEEN"; // 51 lettres
+        const NOISE_LETTERS = "XZKYWQJFPVBMGCDHSNRALT"; // 22 lettres pièges (non utilisées)
+        const FILL_STRING = MYSTERY_SENTENCE_LETTERS + NOISE_LETTERS; // Total 73 cases vides
 
-        function startGame() {
-            playSound('start');
-            currentQuestionIndex = 0;
-            score = 0;
-            updateScoreUI();
-            screenWelcome.classList.add('hidden');
-            screenEnd.classList.add('hidden');
-            screenGame.classList.remove('hidden');
-            screenGame.classList.add('flex');
-            loadQuestion();
-        }
+        const mysteryLayout = [
+            { type: 'word', length: 5 }, // BRAVO
+            { type: 'space' },
+            { type: 'word', length: 4 }, // POUR
+            { type: 'space' },
+            { type: 'word', length: 3 }, // TON
+            { type: 'space' },
+            { type: 'word', length: 7 }, // TRAVAIL
+            { type: 'punctuation', char: '.' },
+            { type: 'space' },
+            { type: 'word', length: 1 }, // C
+            { type: 'punctuation', char: '\'' },
+            { type: 'word', length: 3 }, // EST
+            { type: 'space' },
+            { type: 'word', length: 10 }, // MAINTENANT
+            { type: 'space' },
+            { type: 'word', length: 2 }, // LE
+            { type: 'space' },
+            { type: 'word', length: 4 }, // MOIS
+            { type: 'space' },
+            { type: 'word', length: 2 }, // DE
+            { type: 'space' },
+            { type: 'word', length: 1 }, // L
+            { type: 'punctuation', char: '\'' },
+            { type: 'word', length: 9 }, // HALLOWEEN
+            { type: 'punctuation', char: '.' }
+        ];
 
-        function loadQuestion() {
-            questionAttempts = 0;
-            const q = questionBank[currentQuestionIndex];
-
-            // Reset UI States
-            elInputArea.innerHTML = '';
-            btnSubmit.classList.add('hidden');
-            selectedOption = null;
-
-            // Header info
-            elQuestionCounter.innerText = `Énigme : ${currentQuestionIndex + 1}/${questionBank.length}`;
-            elProgressFill.style.width = `${(currentQuestionIndex / questionBank.length) * 100}%`;
-            elSkillTag.innerText = q.skill;
-            elQuestionText.innerHTML = q.question;
-
-            // Visual graphics
-            if (q.visual) {
-                elVisualArea.innerHTML = q.visual();
-                elVisualArea.classList.remove('hidden');
-            } else {
-                elVisualArea.innerHTML = '';
-                elVisualArea.classList.add('hidden');
-            }
-
-            // Input fields / Options
-            setupInputInterface(q);
-        }
-
-        function setupInputInterface(q) {
-            if (q.type === 'short' || q.typeInput === 'short') {
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.className = 'num-input';
-                input.placeholder = '?';
-                input.id = 'user-answer-input';
-                
-                input.addEventListener('input', (e) => {
-                    if (e.target.value.trim() !== '') {
-                        btnSubmit.classList.remove('hidden');
-                    } else {
-                        btnSubmit.classList.add('hidden');
-                    }
-                });
-
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && input.value.trim() !== '') {
-                        handleSubmitAnswer();
-                    }
-                });
-
-                elInputArea.appendChild(input);
-                setTimeout(() => input.focus(), 150);
-
-            } else {
-                // MCQ / True-False Options
-                const gridClass = q.options.length === 2 ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2';
-                const wrapper = document.createElement('div');
-                wrapper.className = `grid ${gridClass} gap-3 w-full max-w-lg`;
-
-                q.options.forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn font-bold text-base sm:text-lg';
-                    btn.innerHTML = opt;
-                    btn.onclick = () => {
-                        playSound('click');
-                        Array.from(wrapper.children).forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        selectedOption = opt;
-                        btnSubmit.classList.remove('hidden');
-                    };
-                    wrapper.appendChild(btn);
-                });
-
-                elInputArea.appendChild(wrapper);
-            }
-        }
-
-        function handleSubmitAnswer() {
-            const q = questionBank[currentQuestionIndex];
-            let isCorrect = false;
-
-            if (q.type === 'short' || q.typeInput === 'short') {
-                const input = document.getElementById('user-answer-input');
-                const val = input ? input.value : '';
-                isCorrect = q.validator ? q.validator(val) : (val.trim() === q.answer);
-            } else {
-                isCorrect = (selectedOption === q.answer);
-            }
-
-            if (isCorrect) {
-                playSound('correct');
-                let earnedPoints = 10;
-                if (questionAttempts === 1) earnedPoints = 5;
-                else if (questionAttempts >= 2) earnedPoints = 2;
-
-                score += earnedPoints;
-                updateScoreUI();
-
-                showFeedback(
-                    true,
-                    "Bravo ! Bonne réponse",
-                    `${q.explanation}<br><br><span class="text-green-400 font-bold">+${earnedPoints} points gagnés !</span>`
-                );
-                launchConfetti();
-            } else {
-                playSound('wrong');
-                questionAttempts++;
-                showFeedback(
-                    false,
-                    "Ce n'est pas tout à fait ça...",
-                    `Ne te décourage pas ! Relis bien la question et réessaie.<br><br><span class="text-orange-300 italic">💡 Explication / Indice : ${q.explanation}</span>`
-                );
-            }
-        }
-
-        function showFeedback(isSuccess, title, message) {
-            feedbackTitle.innerText = title;
-            feedbackMessage.innerHTML = message;
+        function App() {
+            const [tab, setTab] = useState(1);
             
-            feedbackBox.className = 'feedback-box ' + (isSuccess ? 'feedback-success' : 'feedback-error');
-            feedbackIcon.innerText = isSuccess ? '🎃' : '👻';
-            feedbackOverlay.classList.add('active');
+            // États du Jeu
+            const [foundWords, setFoundWords] = useState([]);
+            const [foundCells, setFoundCells] = useState(new Set());
+            const [currentSelection, setCurrentSelection] = useState([]);
+            const [mysteryLettersSelected, setMysteryLettersSelected] = useState([]);
+            const [isExporting, setIsExporting] = useState(false);
 
-            btnCloseFeedback.onclick = () => {
-                playSound('click');
-                feedbackOverlay.classList.remove('active');
+            const { grid, mysteryCells } = useMemo(() => {
+                let mIdx = 0;
+                const processedGrid = [];
+                const mysterySet = new Set();
+                
+                for (let r = 0; r < 15; r++) {
+                    const row = [];
+                    for (let c = 0; c < 15; c++) {
+                        if (initialGrid[r][c] === null) {
+                            row.push(FILL_STRING[mIdx]);
+                            mysterySet.add(`${r},${c}`);
+                            mIdx++;
+                        } else {
+                            row.push(initialGrid[r][c]);
+                        }
+                    }
+                    processedGrid.push(row);
+                }
+                return { grid: processedGrid, mysteryCells: mysterySet };
+            }, []);
 
-                if (isSuccess) {
-                    currentQuestionIndex++;
-                    if (currentQuestionIndex < questionBank.length) {
-                        loadQuestion();
-                    } else {
-                        endGame();
+            const isGameWon = foundWords.length === wordsList.length;
+            const isPhraseFound = mysteryLettersSelected.length === MYSTERY_SENTENCE_LETTERS.length;
+
+            const handleCellClick = (r, c) => {
+                const cellKey = `${r},${c}`;
+
+                // PHASE 2 : Recherche de la phrase mystère
+                if (isGameWon) {
+                    if (foundCells.has(cellKey)) return; // On ignore les cases des mots trouvés
+                    
+                    const alreadySelectedIdx = mysteryLettersSelected.findIndex(item => item.r === r && item.c === c);
+                    if (alreadySelectedIdx !== -1) {
+                        // Autorise à désélectionner la dernière lettre pour corriger une erreur
+                        if (alreadySelectedIdx === mysteryLettersSelected.length - 1) {
+                            setMysteryLettersSelected(prev => prev.slice(0, -1));
+                        }
+                        return;
+                    }
+
+                    // Si on clique sur une lettre restante, on vérifie si c'est la BONNE lettre (la prochaine dans la phrase)
+                    if (mysteryLettersSelected.length < MYSTERY_SENTENCE_LETTERS.length) {
+                        const expectedChar = MYSTERY_SENTENCE_LETTERS[mysteryLettersSelected.length];
+                        
+                        if (grid[r][c] === expectedChar) {
+                            setMysteryLettersSelected(prev => [...prev, { r, c, letter: grid[r][c] }]);
+                        }
+                    }
+                    return;
+                }
+
+                // PHASE 1 : Recherche des mots
+                if (foundCells.has(cellKey)) return;
+
+                const selectionIndex = currentSelection.findIndex(item => item.r === r && item.c === c);
+                
+                if (selectionIndex !== -1) {
+                    if (selectionIndex === currentSelection.length - 1) {
+                        setCurrentSelection(prev => prev.slice(0, -1)); // Désélection
+                    }
+                    return;
+                }
+
+                // Validation de la ligne droite (vertical ou horizontal)
+                if (currentSelection.length === 0) {
+                    setCurrentSelection([{ r, c }]);
+                } else if (currentSelection.length === 1) {
+                    const prev = currentSelection[0];
+                    const dx = r - prev.r;
+                    const dy = c - prev.c;
+                    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && !(dx === 0 && dy === 0)) {
+                        setCurrentSelection(prevSelection => [...prevSelection, { r, c }]);
                     }
                 } else {
-                    const q = questionBank[currentQuestionIndex];
-                    if (q.type === 'short' || q.typeInput === 'short') {
-                        const input = document.getElementById('user-answer-input');
-                        if (input) {
-                            input.value = '';
-                            input.focus();
-                        }
-                    } else {
-                        const btns = document.querySelectorAll('.option-btn');
-                        btns.forEach(b => b.classList.remove('selected'));
-                        selectedOption = null;
+                    const first = currentSelection[0];
+                    const second = currentSelection[1];
+                    const dirX = second.r - first.r;
+                    const dirY = second.c - first.c;
+                    
+                    const last = currentSelection[currentSelection.length - 1];
+                    const dx = r - last.r;
+                    const dy = c - last.c;
+
+                    if (dx === dirX && dy === dirY) {
+                        setCurrentSelection(prevSelection => [...prevSelection, { r, c }]);
                     }
-                    btnSubmit.classList.add('hidden');
                 }
             };
+
+            useEffect(() => {
+                if (currentSelection.length > 1) {
+                    const wordFormed = currentSelection.map(cell => grid[cell.r][cell.c]).join('');
+                    const wordFormedReversed = wordFormed.split('').reverse().join('');
+
+                    const matchedWord = wordsList.find(w => w === wordFormed || w === wordFormedReversed);
+
+                    if (matchedWord && !foundWords.includes(matchedWord)) {
+                        setFoundWords(prev => [...prev, matchedWord]);
+                        const newFoundCells = new Set(foundCells);
+                        currentSelection.forEach(cell => newFoundCells.add(`${cell.r},${cell.c}`));
+                        setFoundCells(newFoundCells);
+                        setCurrentSelection([]);
+                    }
+                }
+            }, [currentSelection, foundWords, foundCells, grid]);
+
+            const handleDownloadPNG = async (elementId, filename) => {
+                if (!window.html2canvas) return;
+                setIsExporting(true);
+                try {
+                    const element = document.getElementById(elementId);
+                    const canvas = await window.html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    const image = canvas.toDataURL("image/png");
+                    const link = document.createElement('a');
+                    link.href = image;
+                    link.download = filename;
+                    link.click();
+                } catch (error) {
+                    console.error("Erreur lors de l'exportation PNG", error);
+                } finally {
+                    setIsExporting(false);
+                }
+            };
+
+            const renderHeader = (title) => (
+                <div className="flex justify-between items-start border-b-4 border-slate-900 pb-4 mb-6">
+                    <div className="flex gap-4 items-center">
+                        <div className="w-14 h-14 bg-amber-100 border-2 border-slate-900 rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2v3m0 16c-4.418 0-8-1.567-8-3.5S7.582 14 12 14s8 1.567 8 3.5S16.418 21 12 21zM12 14c-4.418 0-8-1.567-8-3.5S7.582 7 12 7s8 1.567 8 3.5S16.418 14 12 14z" />
+                                <path d="M8 11h.01M16 11h.01M12 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-amber-400 text-slate-950 text-xs font-black uppercase px-2 py-0.5 rounded-md">4e Année</span>
+                                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Vocabulaire & Logique</span>
+                            </div>
+                            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5 uppercase tracking-tight font-fredoka">{title}</h1>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 font-mono">
+                        <div className="flex items-end gap-1.5">Prénom : <div className="border-b-2 border-slate-400 w-36"></div></div>
+                        <div className="flex items-end gap-1.5">Date : <div className="border-b-2 border-slate-400 w-40"></div></div>
+                    </div>
+                </div>
+            );
+
+            const renderGrid = () => {
+                return (
+                    <div className="bg-white p-2 border-4 border-slate-900 rounded-2xl inline-block shadow-md mx-auto">
+                        <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(15, minmax(0, 1fr))` }}>
+                            {grid.map((row, r) => row.map((cell, c) => {
+                                const key = `${r},${c}`;
+                                const isFound = foundCells.has(key);
+                                const isSelected = currentSelection.some(item => item.r === r && item.c === c);
+                                const isMysterySelected = mysteryLettersSelected.some(item => item.r === r && item.c === c);
+
+                                let bgClass = "bg-white hover:bg-slate-100 cursor-pointer text-slate-800 border-slate-200";
+                                
+                                if (isFound) {
+                                    bgClass = "bg-emerald-100 text-emerald-950 border-emerald-300 font-bold opacity-85 cursor-default";
+                                } else if (isSelected) {
+                                    bgClass = "bg-emerald-500 text-white border-emerald-700 font-black shadow-inner scale-105 transform transition-transform";
+                                } else if (isMysterySelected) {
+                                    bgClass = "bg-orange-500 text-white border-orange-700 font-black shadow-inner scale-105 transform transition-transform";
+                                } else if (isGameWon) {
+                                    bgClass = "bg-orange-50 hover:bg-orange-200 cursor-pointer text-slate-900 border-orange-300 font-bold";
+                                }
+
+                                return (
+                                    <div 
+                                        key={key} 
+                                        onClick={() => handleCellClick(r, c)}
+                                        className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center border-2 text-sm sm:text-base font-bold select-none rounded-md transition-all duration-150 ${bgClass}`}
+                                    >
+                                        {cell}
+                                    </div>
+                                );
+                            }))}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="max-w-5xl mx-auto px-4 py-6">
+                    {/* Navigation Onglets */}
+                    <div data-html2canvas-ignore="true" className="flex gap-2 mb-4 border-b border-slate-200 pb-2">
+                        <button 
+                            onClick={() => setTab(1)} 
+                            className={`px-5 py-2.5 font-bold rounded-xl transition-all flex items-center gap-2 ${tab === 1 ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200'}`}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            Fiche Élève (Activité)
+                        </button>
+                        <button 
+                            onClick={() => setTab(3)} 
+                            className={`px-5 py-2.5 font-bold rounded-xl transition-all flex items-center gap-2 ${tab === 3 ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200'}`}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                            Fiche Enseignant
+                        </button>
+                    </div>
+
+                    {}
+                    {tab === 1 && (
+                        <div className="flex flex-col items-center">
+                            <div data-html2canvas-ignore="true" className="w-full flex justify-end mb-4">
+                                <button 
+                                    onClick={() => handleDownloadPNG("fiche-activite", "MotMystere_Halloween_4eAnnee.png")}
+                                    disabled={isExporting}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    {isExporting ? "Génération de l'image..." : "Télécharger l'Activité (PNG)"}
+                                </button>
+                            </div>
+
+                            <div className="w-full overflow-x-auto overflow-y-hidden pb-6">
+                                <div 
+                                    id="fiche-activite" 
+                                    className="bg-white p-8 border-2 border-slate-300 shadow-xl rounded-2xl mx-auto flex flex-col"
+                                    style={{ width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}
+                                >
+                                    {renderHeader("Le Manoir des Mots Cachés")}
+
+                                    {/* Consignes */}
+                                    <div className="bg-amber-50 border-l-4 border-amber-500 p-3.5 mb-5 rounded-r-xl">
+                                        <h3 className="font-bold text-amber-950 mb-0.5 text-sm">Consignes :</h3>
+                                        <ul className="text-amber-900 list-disc list-inside space-y-1 text-xs font-semibold leading-relaxed">
+                                            <li>Trouve les <strong>20 mots</strong> cachés dans la grille (en ligne droite).</li>
+                                            <li>Une fois tous les mots trouvés, la grille se déverrouille pour la <strong>phrase mystère</strong> !</li>
+                                            <li>Lis les lettres restantes (de gauche à droite). Clique sur les <strong>bonnes lettres dans l'ordre</strong> pour former la phrase. <br/><span className="text-amber-700 italic">Attention : à la fin de la grille, certaines lettres sont des pièges et ne seront pas utilisées !</span></li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Grille de jeu */}
+                                    <div className="flex flex-col items-center mb-5">
+                                        {renderGrid()}
+                                    </div>
+
+                                    {/* Liste des Mots */}
+                                    <div className="mb-4">
+                                        <div className="flex justify-between items-center border-b-2 border-slate-200 pb-1.5 mb-2">
+                                            <h3 className="font-black text-base text-slate-800 uppercase tracking-wider font-fredoka">
+                                                Mots à trouver ({foundWords.length} / 20)
+                                            </h3>
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-y-1.5 gap-x-3">
+                                            {wordsList.map(word => {
+                                                const isFound = foundWords.includes(word);
+                                                return (
+                                                    <div key={word} className={`flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm ${isFound ? 'text-emerald-700 line-through opacity-60' : 'text-slate-700'}`}>
+                                                        <div className={`w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 flex items-center justify-center rounded-sm shrink-0 ${isFound ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-300'}`}>
+                                                            {isFound && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                        </div>
+                                                        <span className="truncate">{word}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Encadré Réponse Phrase Mystère */}
+                                    <div className={`mt-auto bg-slate-50 border-3 ${isGameWon ? 'border-orange-500 bg-orange-50/50 shadow-md' : 'border-slate-300'} p-4 rounded-2xl transition-all`}>
+                                        <div className="flex items-center justify-center gap-2 mb-1">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isGameWon ? "#ea580c" : "#94a3b8"} strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                            <h3 className={`font-black text-lg uppercase tracking-wider font-fredoka ${isGameWon ? 'text-orange-600' : 'text-slate-400'}`}>
+                                                Phrase Mystère
+                                            </h3>
+                                        </div>
+
+                                        {!isPhraseFound ? (
+                                            <p className="text-center text-xs font-semibold mb-3 text-slate-500">
+                                                {isGameWon 
+                                                    ? "La grille est déverrouillée ! Clique sur la prochaine bonne lettre de la phrase ci-dessous."
+                                                    : "Trouve d'abord tous les mots pour débloquer la phrase mystère."
+                                                }
+                                            </p>
+                                        ) : (
+                                            <div className="bg-emerald-100 text-emerald-800 p-2 rounded-lg text-center font-bold text-sm mb-3 border-2 border-emerald-400">
+                                                Félicitations ! Tu as reconstitué le message !
+                                            </div>
+                                        )}
+
+                                        {}
+                                        <div className="flex flex-wrap justify-center gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-3">
+                                            {(() => {
+                                                let globalIndex = 0;
+                                                return mysteryLayout.map((item, idx) => {
+                                                    if (item.type === 'space') {
+                                                        return <div key={`space-${idx}`} className="w-1.5 sm:w-3"></div>;
+                                                    } else if (item.type === 'punctuation') {
+                                                        return <div key={`punc-${idx}`} className="flex items-end justify-center text-lg sm:text-xl font-black text-slate-800 pb-0.5">{item.char}</div>;
+                                                    } else if (item.type === 'word') {
+                                                        const letters = [];
+                                                        for(let i = 0; i < item.length; i++) {
+                                                            const charObj = mysteryLettersSelected[globalIndex];
+                                                            letters.push(
+                                                                <div 
+                                                                    key={globalIndex} 
+                                                                    className={`w-5 h-7 sm:w-6 sm:h-8 border-b-[3px] flex items-center justify-center text-base sm:text-xl font-black transition-colors ${charObj ? 'border-orange-600 text-orange-600' : 'border-slate-300 text-transparent'}`}
+                                                                >
+                                                                    {charObj ? charObj.letter : '_'}
+                                                                </div>
+                                                            );
+                                                            globalIndex++;
+                                                        }
+                                                        return <div key={`word-${idx}`} className="flex gap-0.5">{letters}</div>;
+                                                    }
+                                                });
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {}
+                    {tab === 3 && (
+                        <div className="max-w-4xl mx-auto bg-white p-8 border-2 border-slate-300 shadow-lg rounded-2xl">
+                            <div className="border-b-4 border-indigo-200 pb-4 mb-6">
+                                <span className="bg-indigo-100 text-indigo-800 text-xs font-bold uppercase px-3 py-1 rounded-full">Guide Pédagogique</span>
+                                <h2 className="text-3xl font-black text-indigo-950 mt-1 font-fredoka">Fiche Enseignant & Intégration</h2>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-6 mb-8">
+                                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                    <h3 className="font-bold text-slate-500 uppercase text-xs tracking-wider mb-3">Paramètres de l'Activité</h3>
+                                    <ul className="space-y-2 text-sm text-slate-700">
+                                        <li className="flex justify-between border-b pb-1"><strong>Niveau :</strong> <span>4e année primaire</span></li>
+                                        <li className="flex justify-between border-b pb-1"><strong>Thème :</strong> <span>Halloween & Automne</span></li>
+                                        <li className="flex justify-between border-b pb-1"><strong>Grille :</strong> <span>15x15 (20 mots)</span></li>
+                                        <li className="flex justify-between border-b pb-1"><strong>Mécanique Phrase :</strong> <span>Mots restants avec pièges</span></li>
+                                    </ul>
+                                </div>
+                                
+                                <div className="bg-indigo-50 p-5 rounded-xl border border-indigo-200 text-indigo-950">
+                                    <h3 className="font-bold text-indigo-700 uppercase text-xs tracking-wider mb-3">Objectifs d'apprentissage</h3>
+                                    <ul className="space-y-2 text-sm">
+                                        <li className="flex items-start gap-2">✓ Épellation et reconnaissance visuelle des mots.</li>
+                                        <li className="flex items-start gap-2">✓ Lecture méthodique (de gauche à droite).</li>
+                                        <li className="flex items-start gap-2">✓ Discrimination visuelle (ignorer les lettres pièges).</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="bg-amber-50 p-5 rounded-xl border border-amber-200 mb-6">
+                                <h3 className="font-bold text-amber-900 text-base mb-2">Solution de la Phrase Secrète</h3>
+                                <p className="font-mono text-base font-black text-amber-900 bg-white p-4 rounded-lg border border-amber-300 text-center shadow-sm">
+                                    "Bravo pour ton travail. C'est maintenant le mois de l'Halloween."
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-100 p-4 rounded-lg border border-slate-300 text-sm text-slate-700">
+                                <strong>Note sur la mécanique :</strong> Sur les 73 cases non-utilisées par les mots croisés, seules les 51 premières sont utilisées pour former la phrase (dans le sens naturel de lecture). Les 22 dernières cases de la grille sont remplies de lettres aléatoires formant des "pièges" pour obliger l'élève à s'arrêter au bon endroit !
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
         }
 
-        function endGame() {
-            screenGame.classList.add('hidden');
-            screenGame.classList.remove('flex');
-            screenEnd.classList.remove('hidden');
-            screenEnd.classList.add('flex');
-
-            const maxScore = questionBank.length * 10;
-            document.getElementById('final-score-display').innerText = `${score} / ${maxScore}`;
-            
-            const msgEl = document.getElementById('final-message');
-            if (score >= 180) {
-                msgEl.innerText = "Légendaire ! Tu maîtrises parfaitement les mathématiques du 2e cycle ! 🏆";
-                launchConfetti();
-            } else if (score >= 120) {
-                msgEl.innerText = "Très bien joué ! Tu as réussi à sortir du manoir hanté ! 🥈";
-            } else {
-                msgEl.innerText = "Tu as réussi à terminer le parcours en persévérant ! Continue à t'entraîner ! 👍";
-            }
-        }
-
-        function updateScoreUI() {
-            elScore.innerText = score;
-        }
-
-        // Event Listeners Initialization
-        btnStart.addEventListener('click', startGame);
-        btnSubmit.addEventListener('click', handleSubmitAnswer);
-        btnRestart.addEventListener('click', startGame);
-
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
